@@ -1,0 +1,272 @@
+<?xml version ='1.0' encoding ='UTF-8' ?>
+<definitions name='EsiExpo'
+  xmlns:tns='http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl'
+  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
+  xmlns:xsd='http://www.w3.org/2001/XMLSchema'
+  xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'
+  xmlns:mime='http://schemas.xmlsoap.org/wsdl/mime/'
+  xmlns='http://schemas.xmlsoap.org/wsdl/'
+  targetNamespace='http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl'
+  xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/'>
+
+<message name='existeUsuarioRequest'>
+  <part name='usuario' type='xsd:string'/>
+</message>
+<message name='existeUsuarioResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='crearUsuarioRequest'>
+  <part name='correo' type='xsd:string'/>
+  <part name='usuario' type='xsd:string'/>
+  <part name='contrasena' type='xsd:string'/>
+  <part name='nombre' type='xsd:string'/>
+  <part name='apellido' type='xsd:string'/>
+  <part name='telefono' type='xsd:string'/>
+  <part name='tipodoc' type='xsd:string'/>
+  <part name='numdoc' type='xsd:string'/>
+</message>
+<message name='crearUsuarioResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='isLoggedRequest'>
+  <part name='symbol' type='xsd:string'/>
+</message>
+<message name='isLoggedResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='getSessionNameRequest'>
+  <part name='symbol' type='xsd:string'/>
+</message>
+<message name='getSessionNameResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='logInRequest'>
+  <part name='user' type='xsd:string'/>
+  <part name='password' type='xsd:string'/>
+</message>
+<message name='logInResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='buildCookieRequest'>
+  <part name='uid' type='xsd:string'/>
+  <part name='timestamp' type='xsd:string'/>
+</message>
+<message name='buildCookieResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='logOutRequest'>
+  <part name='symbol' type='xsd:string'/>
+</message>
+<message name='logOutResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='getUidRequest'>
+  <part name='symbol' type='xsd:string'/>
+</message>
+<message name='getUidResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='getUserNameRequest'>
+  <part name='symbol' type='xsd:string'/>
+</message>
+<message name='getUserNameResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='registerUserRequest'>
+  <part name='email' type='xsd:string'/>
+  <part name='tipodoc' type='xsd:string'/>
+  <part name='numdoc' type='xsd:string'/>
+  <part name='nombres' type='xsd:string'/>
+  <part name='apellidos' type='xsd:string'/>
+  <part name='telefono' type='xsd:string'/>
+  <part name='password' type='xsd:string'/>
+</message>
+<message name='registerUserResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='resetPasswdRequest'>
+  <part name='symbol' type='xsd:string'/>
+</message>
+<message name='resetPasswdResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+
+<portType name='EsiExpoPortType'>
+  <operation name='existeUsuario'>
+    <input message='tns:existeUsuarioRequest'/>
+    <output message='tns:existeUsuarioResponse'/>
+  </operation>
+  <operation name='crearUsuario'>
+    <input message='tns:crearUsuarioRequest'/>
+    <output message='tns:crearUsuarioResponse'/>
+  </operation>
+  <operation name='isLogged'>
+    <input message='tns:isLoggedRequest'/>
+    <output message='tns:isLoggedResponse'/>
+  </operation>
+  <operation name='getSessionName'>
+    <input message='tns:getSessionNameRequest'/>
+    <output message='tns:getSessionNameResponse'/>
+  </operation>
+  <operation name='logIn'>
+    <input message='tns:logInRequest'/>
+    <output message='tns:logInResponse'/>
+  </operation>
+  <operation name='buildCookie'>
+    <input message='tns:buildCookieRequest'/>
+    <output message='tns:buildCookieResponse'/>
+  </operation>
+  <operation name='logOut'>
+    <input message='tns:logOutRequest'/>
+    <output message='tns:logOutResponse'/>
+  </operation>
+  <operation name='getUid'>
+    <input message='tns:getUidRequest'/>
+    <output message='tns:getUidResponse'/>
+  </operation>
+  <operation name='getUserName'>
+    <input message='tns:getUserNameRequest'/>
+    <output message='tns:getUserNameResponse'/>
+  </operation>
+  <operation name='registerUser'>
+    <input message='tns:registerUserRequest'/>
+    <output message='tns:registerUserResponse'/>
+  </operation>
+  <operation name='resetPasswd'>
+    <input message='tns:resetPasswdRequest'/>
+    <output message='tns:resetPasswdResponse'/>
+  </operation>
+</portType>
+
+<binding name='EsiExpoBinding' type='tns:EsiExpoPortType'>
+  <soap:binding style='rpc'
+    transport='http://schemas.xmlsoap.org/soap/http'/>
+    <operation name='existeUsuario'>
+    <soap:operation soapAction='urn:localhost-esiexpo#existeUsuario'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='crearUsuario'>
+    <soap:operation soapAction='urn:localhost-esiexpo#crearUsuario'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='isLogged'>
+    <soap:operation soapAction='urn:localhost-esiexpo#isLogged'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='getSessionName'>
+    <soap:operation soapAction='urn:localhost-esiexpo#getSessionName'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='logIn'>
+    <soap:operation soapAction='urn:localhost-esiexpo#logIn'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='buildCookie'>
+    <soap:operation soapAction='urn:localhost-esiexpo#buildCookie'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='logOut'>
+    <soap:operation soapAction='urn:localhost-esiexpo#logOut'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='getUid'>
+    <soap:operation soapAction='urn:localhost-esiexpo#getUid'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='getUserName'>
+    <soap:operation soapAction='urn:localhost-esiexpo#getUserName'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='registerUser'>
+    <soap:operation soapAction='urn:localhost-esiexpo#registerUser'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+  <operation name='resetPasswd'>
+    <soap:operation soapAction='urn:localhost-esiexpo#resetPasswd'/>
+    <input>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </input>
+    <output>
+      <soap:body use='encoded' namespace='urn:localhost-esiexpo'
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+    </output>
+  </operation>
+</binding>
+
+<service name='EsiExpoService'>
+  <port name='EsiExpoPort' binding='tns:EsiExpoBinding'>
+    <soap:address location='http://clasificados.eltiempo.com/services/soap'/>
+  </port>
+</service>
+</definitions>

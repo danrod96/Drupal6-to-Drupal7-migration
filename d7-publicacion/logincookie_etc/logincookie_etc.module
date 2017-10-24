@@ -1,0 +1,103 @@
+<?php
+/**
+ * @file
+ *
+ * Module for providing auth services for Drupal 7, cookie creation and session purge.
+ */
+
+ /**
+  * Implements hook_user_login
+  *
+  * If user logs in Drupal 7, this hook will call the webservice for logging in Drupal 6
+  */
+ function logincookie_etc_user_login(&$edit, $account)
+ {
+ 	global $user;
+ 	global $cookie_domain;
+
+ 	//validar si existe $edit['input'], si no existe, es porque esta logueandose desde el webservice
+ 	if (isset($edit['input'])){ 
+	 	$usuario = $edit['input']['name'];
+	 	$contrasena = $edit['input']['pass'];
+
+	 	//esta variable es importante porque almacena la sesion de drupal 6, que luego se utiliza para construir la cookie en D6
+	 	$_SESSION["sid_usuario_d6"] = "";
+
+	 	//cambiar a produccion o a donde este el servicio
+	 	$client = new SoapClient("http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl");
+
+	 	$res = $client->existeUsuario($usuario);
+
+	 	$tmp = json_decode($res);
+
+	 	if (!$tmp->codigo){
+	 		//drupal_set_message("El usuario no existe en drupal 6");
+	 	} else {
+	 		if (is_array($contrasena)){
+	 			//usuario recien registrado
+	 			$contrasena = $edit['input']['pass']['pass2'];
+	 		}
+
+	 		//hace el proceso inicial de login
+	 		$res = $client->logIn($usuario, $contrasena);
+
+	 		$tmp = json_decode($res);
+
+	 		if ($tmp->codigo  == -1){
+	 			//drupal_set_message("El usuario no existe en drupal 6");
+	 		} else if ($tmp->codigo == 0){
+	 			//drupal_set_message("Credenciales incorrectas en Drupal 6");
+	 		} else {
+			 	$session_name = $client->getSessionName();
+
+			 	//no construyo bien la cookie en el primer intento de logIn, forzar login de nuevo y la construccion de la cookie
+			 	if (!isset($tmp->sid)){
+			 		$res1 = $client->logIn($usuario, $contrasena);
+
+			 		$tmp1 = json_decode($res1);
+
+			 		$res2 = $client->buildCookie($tmp1->uid, $tmp1->timestamp);
+
+			 		$tmp2 = json_decode($res2);
+			 	} else { 
+
+			 		$res = $client->buildCookie($tmp->uid, $tmp->timestamp);
+
+			 		$tmp2 = json_decode($res);
+
+			 	}
+
+			 	//construir la cookie de Drupal 6
+			 	setcookie($session_name, $tmp2->sid, $_SERVER['REQUEST_TIME'] + 3600, "/", ".eltiempo.com");
+
+			 	//Guardar la sesion de Drupal 6 dentro del arreglo $_SESSION
+			 	$_SESSION["sid_usuario_d6"] = $tmp2->sid;
+	 		}
+	 	}
+
+ 	} else {
+ 		//hacer validaciones necesarias
+ 	}
+ }
+
+ /**
+  * Implements hook_user_logout
+  *
+  * If user logs out from Drupal 7, this hook will call the webservice for logging out from Drupal 6
+  */
+ function logincookie_etc_user_logout($account)
+ {
+ 	$client = new SoapClient("http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl");
+
+ 	$session_name = $client->getSessionName();
+
+ 	$sid_d6 = $_SESSION["sid_usuario_d6"];
+
+ 	if ($sid_d6 != ""){
+ 		//el cookie en drupal 6 se levanto desde drupal 7
+ 		$client->logOut($sid_d6);
+ 	} else {
+ 		//el cookie en d6 no se levanto de drupal 7, pudo haber sido levantado desde mobile
+ 		$client->logOut($_COOKIE[$session_name]);
+ 	}
+ }

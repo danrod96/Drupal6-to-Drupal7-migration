@@ -1,0 +1,105 @@
+<?php
+/**
+ * @file
+ * 
+ * Modulo que provee un servicio para registrar usuarios.
+ * 
+ */
+
+ /**
+  * Function converter_etc_server
+  * 
+  * Es la funcion que genera una instancia del servicio SOAP. Llamada por hook_menu al entrar a http://www.sitioweb.com/services/soap
+  */
+function converter_etc_server()
+{	 
+	$path_funciones = getcwd() . '/' . drupal_get_path('module', 'converter_etc') . '/includes/wserver_converter.inc';
+	
+	include_once($path_funciones);
+	
+	//incluir el archivo wsdl
+	$path_wsdl = getcwd() . '/' . drupal_get_path('module', 'converter_etc') . '/wsdl/converter.wsdl';
+	
+	//instanciar webservice
+	$server = new SoapServer($path_wsdl);
+ 
+ 	//agregar las funciones a consumir
+ 	$server->addFunction("existeUsuario");
+ 	$server->addFunction("crearUsuario");
+ 	$server->addFunction("actualizarUsuario");
+ 	$server->addFunction("logOut7");
+ 	$server->addFunction("logIn7");
+ 	$server->addFunction("getSessionName");
+ 	$server->addFunction("isLogged");
+ 	$server->addFunction("buildCookie");
+ 	$server->handle();
+}
+
+ 
+ /**
+  * Implementation of hook_menu
+  * 
+  * El cliente no entra directamente a a este path, lo hace por intermedio del archivo wsdl.
+  */
+ function converter_etc_menu()
+ {
+	$items = array();
+	$items['services/soap'] = array(
+		'title' => 'SOAP Server',
+		'page callback' => 'converter_etc_server',
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+ 	);
+
+    return $items;
+}
+
+
+/**
+ * Implementation of hook_user_presave
+ * 
+ * hook que se ejecuta cuando un usuario esta a punto de ser creado o actualizado
+ * puede ejecutarse cuando:
+ * 
+ * 1. Se crea un usuario de drupal 7 por el formulario y se crea en 6, en ese caso se ejecuta el codigo a continuacion
+ * 2. Se crea un usuario en drupal 7 desde d6 por webservice, en ese caso hay que verificar que el usuario se esta creando
+ * por el formulario
+ */
+ function converter_etc_user_presave(&$edit, $account, $category)
+ {
+ 	if ($account->is_new){ 
+ 		//se envio por medio del formulario y no por webservice, por webservice, $_POST no tiene informaciopn
+ 		//por lo tanto no pasa la ejecucion por aca, lo cual es la idea
+ 		if (isset($_POST["name"])){ 
+		 	//llamar al webservice de drupal 6 para registrar el usuario alla
+		 	$client = new SoapClient("http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl");
+		
+			$language = "LANGUAGE_NONE";
+		
+			$usuario = $_POST["name"];
+			$correo = $edit["mail"];
+			$contra = $_POST["pass"]["pass1"];
+			$nombre = $edit["field_user_name"][$language][0]["value"];
+			$apellido = $edit["field_user_last"][$language][0]["value"];
+			$tipodoc = $edit["field_id_type"][$language][0]["tid"];
+			$numdoc = $edit["field_id_number"][$language][0]["value"];
+		 	$telefono = $edit["field_phone_number"][$language][0]["value"];
+		  	
+		  	$tmp = $client->crearUsuario($correo, $usuario, $contra, $nombre, $apellido, $telefono, $tipodoc, $numdoc);
+		  	
+		  	$res = json_decode($tmp);
+		  	
+		  	if (!$res){
+		  		//drupal_set_message("Error al cargar el usuario en drupal 6", "error");
+		  	} else {
+		  		//drupal_set_message("Usuario creado en drupal 6 correctamente");
+		  		
+		  		//la funcion crearUsuario debe devolver el UID del usuario en Drupal 6
+		  		//para guardarlo aca
+				$edit["field_uid_d6"][$language][0]["value"] = $res->msg;
+		  	}
+	  	
+ 		}
+ 	}
+ }
+ 

@@ -1,0 +1,209 @@
+<?xml version ='1.0' encoding ='UTF-8' ?>
+<definitions name='EsiConv'
+  xmlns:tns='https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/converter_etc/wsdl/converter.wsdl' 
+  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
+  xmlns:xsd='http://www.w3.org/2001/XMLSchema'
+  xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'
+  xmlns:mime='http://schemas.xmlsoap.org/wsdl/mime/'
+  xmlns='http://schemas.xmlsoap.org/wsdl/'
+  targetNamespace='https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/converter_etc/wsdl/converter.wsdl'
+  xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/'>
+
+<message name='existeUsuarioRequest'> 
+  <part name='usuario' type='xsd:string'/> 
+</message> 
+<message name='existeUsuarioResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='crearUsuarioRequest'> 
+  <part name='correo' type='xsd:string'/>
+  <part name='usuario' type='xsd:string'/>
+  <part name='contrasena' type='xsd:string'/>
+  <part name='nombre' type='xsd:string'/>
+  <part name='apellido' type='xsd:string'/>
+  <part name='telefono' type='xsd:string'/>
+  <part name='tipodoc' type='xsd:string'/>
+  <part name='numdoc' type='xsd:string'/> 
+  <part name='uid6' type='xsd:string'/>
+</message>
+<message name='crearUsuarioResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='actualizarUsuarioRequest'> 
+  <part name='nombre' type='xsd:string'/>
+  <part name='apellido' type='xsd:string'/>
+  <part name='telefono' type='xsd:string'/>
+  <part name='tipodoc' type='xsd:string'/>
+  <part name='numdoc' type='xsd:string'/>
+   <part name='uid6' type='xsd:string'/>
+</message>
+<message name='actualizarUsuarioResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='logOut7Request'> 
+  <part name='symbol' type='xsd:string'/> 
+</message> 
+<message name='logOut7Response'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='logIn7Request'> 
+  <part name='user' type='xsd:string'/>
+  <part name='password' type='xsd:string'/> 
+</message> 
+<message name='logIn7Response'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='getSessionNameRequest'>
+  <part name='symbol' type='xsd:string'/>
+</message>
+<message name='getSessionNameResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='isLoggedRequest'>
+  <part name='symbol' type='xsd:string'/>
+</message>
+<message name='isLoggedResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='buildCookieRequest'>
+  <part name='uid' type='xsd:string'/>
+  <part name='timestamp' type='xsd:string'/>
+</message>
+<message name='buildCookieResponse'>
+  <part name='Result' type='xsd:string'/>
+</message>
+
+<portType name='EsiConvPortType'> 
+  <operation name='existeUsuario'>
+    <input message='tns:existeUsuarioRequest'/> 
+    <output message='tns:existeUsuarioResponse'/>   
+  </operation>
+  <operation name='crearUsuario'>
+    <input message='tns:crearUsuarioRequest'/> 
+    <output message='tns:crearUsuarioResponse'/>   
+  </operation>
+  <operation name='actualizarUsuario'>
+    <input message='tns:actualizarUsuarioRequest'/> 
+    <output message='tns:actualizarUsuarioResponse'/>   
+  </operation>
+  <operation name='logOut7'>
+    <input message='tns:logOut7Request'/> 
+    <output message='tns:logOut7Response'/>   
+  </operation>
+  <operation name='logIn7'>
+    <input message='tns:logIn7Request'/> 
+    <output message='tns:logIn7Response'/>   
+  </operation>
+  <operation name='getSessionName'>
+    <input message='tns:getSessionNameRequest'/>
+    <output message='tns:getSessionNameResponse'/>
+  </operation>
+  <operation name='isLogged'>
+    <input message='tns:isLoggedRequest'/>
+    <output message='tns:isLoggedResponse'/>
+  </operation>
+  <operation name='buildCookie'>
+    <input message='tns:buildCookieRequest'/>
+    <output message='tns:buildCookieResponse'/>
+  </operation>
+</portType> 
+
+<binding name='EsiConvBinding' type='tns:EsiConvPortType'> 
+  <soap:binding style='rpc' 
+    transport='http://schemas.xmlsoap.org/soap/http'/> 
+    <operation name='existeUsuario'> 
+    <soap:operation soapAction='urn:localhost-esiconv#existeUsuario'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='crearUsuario'> 
+    <soap:operation soapAction='urn:localhost-esiconv#crearUsuario'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='actualizarUsuario'> 
+    <soap:operation soapAction='urn:localhost-esiconv#actualizarUsuario'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='logOut7'> 
+    <soap:operation soapAction='urn:localhost-esiconv#logOut7'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='logIn7'> 
+    <soap:operation soapAction='urn:localhost-esiconv#logIn7'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='getSessionName'> 
+    <soap:operation soapAction='urn:localhost-esiconv#getSessionName'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='isLogged'> 
+    <soap:operation soapAction='urn:localhost-esiconv#isLogged'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='buildCookie'> 
+    <soap:operation soapAction='urn:localhost-esiconv#buildCookie'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiconv' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+</binding> 
+
+<service name='EsiConvService'> 
+  <port name='EsiConvPort' binding='tns:EsiConvBinding'> 
+    <soap:address location='https://seg.eltiempo.com/publicaraviso/services/soap'/>  
+  </port> 
+</service>
+</definitions>

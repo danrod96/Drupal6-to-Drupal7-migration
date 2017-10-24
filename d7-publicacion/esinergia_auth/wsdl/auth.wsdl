@@ -1,0 +1,180 @@
+<?xml version ='1.0' encoding ='UTF-8' ?>
+<definitions name='EsiAuth'
+  xmlns:tns='https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/esinergia_auth/wsdl/auth.wsdl' 
+  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
+  xmlns:xsd='http://www.w3.org/2001/XMLSchema'
+  xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'
+  xmlns:mime='http://schemas.xmlsoap.org/wsdl/mime/'
+  xmlns='http://schemas.xmlsoap.org/wsdl/'
+  targetNamespace='https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/esinergia_auth/wsdl/auth.wsdl'
+  xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/'>
+
+<message name='isLoggedRequest'> 
+  <part name='symbol' type='xsd:string'/> 
+</message> 
+<message name='isLoggedResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='getUserNameRequest'> 
+  <part name='symbol' type='xsd:string'/> 
+</message> 
+<message name='getUserNameResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='getUidRequest'> 
+  <part name='symbol' type='xsd:string'/> 
+</message> 
+<message name='getUidResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='logOutRequest'> 
+  <part name='symbol' type='xsd:string'/> 
+</message> 
+<message name='logOutResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='logInRequest'> 
+  <part name='user' type='xsd:string'/>
+  <part name='password' type='xsd:string'/> 
+</message> 
+<message name='logInResponse'> 
+  <part name='Result' type='xsd:string'/>
+</message>
+<message name='resetPasswdRequest'> 
+  <part name='symbol' type='xsd:string'/> 
+</message> 
+<message name='resetPasswdResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message>
+<message name='registerUserRequest'> 
+  <part name='email' type='xsd:string'/>
+  <part name='tipodoc' type='xsd:string'/>
+  <part name='numdoc' type='xsd:string'/>
+  <part name='nombres' type='xsd:string'/>
+  <part name='apellidos' type='xsd:string'/>
+  <part name='telefono' type='xsd:string'/>
+  <part name='password' type='xsd:string'/> 
+</message>
+<message name='registerUserResponse'> 
+  <part name='Result' type='xsd:string'/>
+</message>
+
+<portType name='EsiAuthPortType'> 
+    <operation name='isLogged'>
+    <input message='tns:isLoggedRequest'/> 
+    <output message='tns:isLoggedResponse'/>   
+  </operation>
+  <operation name='getUserName'>
+    <input message='tns:getUserNameRequest'/> 
+    <output message='tns:getUserNameResponse'/>   
+  </operation>  
+  <operation name='getUid'>
+    <input message='tns:getUidRequest'/> 
+    <output message='tns:getUidResponse'/>   
+  </operation>
+  <operation name='logOut'>
+    <input message='tns:logOutRequest'/> 
+    <output message='tns:logOutResponse'/>   
+  </operation>
+  <operation name='logIn'>
+    <input message='tns:logInRequest'/> 
+    <output message='tns:logInResponse'/>   
+  </operation>
+  <operation name='resetPasswd'>
+    <input message='tns:resetPasswdRequest'/> 
+    <output message='tns:resetPasswdResponse'/>   
+  </operation>
+  <operation name='registerUser'>
+    <input message='tns:registerUserRequest'/> 
+    <output message='tns:registerUserResponse'/>   
+  </operation> 
+</portType> 
+
+<binding name='EsiAuthBinding' type='tns:EsiAuthPortType'> 
+  <soap:binding style='rpc' 
+    transport='http://schemas.xmlsoap.org/soap/http'/> 
+    <operation name='isLogged'> 
+    <soap:operation soapAction='urn:localhost-esiauth#isLogged'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='getUserName'> 
+    <soap:operation soapAction='urn:localhost-esiauth#getUserName'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+    <operation name='getUid'> 
+    <soap:operation soapAction='urn:localhost-esiauth#getUid'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='logOut'> 
+    <soap:operation soapAction='urn:localhost-esiauth#logOut'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='logIn'> 
+    <soap:operation soapAction='urn:localhost-esiauth#logIn'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+    <operation name='resetPasswd'> 
+    <soap:operation soapAction='urn:localhost-esiauth#resetPasswd'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='registerUser'> 
+    <soap:operation soapAction='urn:localhost-esiauth#registerUser'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-esiauth' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+</binding> 
+
+<service name='EsiAuthService'> 
+  <port name='EsiAuthPort' binding='tns:EsiAuthBinding'> 
+    <soap:address location='https://seg.eltiempo.com/publicaraviso/services/soap2'/>  
+  </port> 
+</service>
+</definitions>

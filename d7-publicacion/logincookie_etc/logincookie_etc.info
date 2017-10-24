@@ -1,0 +1,5 @@
+name = Esinergia Login
+description = "Provides Login Services to User. If user logs in here (Drupal 7 website), it will also logs in Drupal 6 Website."
+package = E SINERGIA
+core = 7.x
+version = "7.x-1.0"

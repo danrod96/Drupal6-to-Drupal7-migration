@@ -1,0 +1,5 @@
+name = Esinergia Converter
+description = "Modulo que crea un webservice para registrar usuarios"
+package = E SINERGIA
+core = 7.x
+version = "7.x-1.0"

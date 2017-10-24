@@ -1,0 +1,5 @@
+name = ESINERGIA EXPORTER
+description = "Module used for integrating Drupal 6 and Drupal 7 websites. The idea is to use the same user for both Drupal 6/7 websites"
+core = 6.x
+version = "6.x-3.0"
+package = E-SINERGIA
