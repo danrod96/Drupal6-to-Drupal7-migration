@@ -3,7 +3,7 @@
  * @file
  *
  *
- * User related functions: creation, update user profile, logging on, logging off, etc.
+ * Webservice user related methods: creation, update user profile, logging on, logging off, etc.
  *
  * Version 1.0 - 13/01/2015
  * - Initial version
@@ -20,17 +20,18 @@
  {
     global $db_prefix;
 
-   	//obtener la BD donde estan los usuarios
+    //users are stored in another DB
   	$db_users = $db_prefix["users"];
 
   	if (!isset($db_sessions)){
   		$db_users = "";
   	}
 
- 	$response = array("codigo" => "0","msg" => "No existe usuario");
+ 	  $response = array("codigo" => "0","msg" => "No existe usuario");
 
-   	//validar si ya existe el correo o el usuario en el campo mail
+    //check if user exists
   	$query_validar_correo = "SELECT uid FROM {" . $db_users . "users} WHERE name = '%s'";
+
   	$es_correo = db_fetch_object(db_query($query_validar_correo, $user));
 
   	if ($es_correo->uid){
@@ -38,14 +39,14 @@
   	  	return json_encode($response);
   	}
 
-  	//validar si ya existe el correo o el usuario en el campo name
   	$query_validar_correo2 = "SELECT uid FROM {" . $db_users . "users} WHERE mail = '%s'";
+
   	$es_correo2 = db_fetch_object(db_query($query_validar_correo2, $user));
 
-  	 if ($es_correo2->uid){
-  	 	$response = array("codigo" => "1","msg" => "Existe usuario");
-  	  	return json_encode($response);
-  	 }
+  	if ($es_correo2->uid){
+  	 $response = array("codigo" => "1","msg" => "Existe usuario");
+  	 return json_encode($response);
+  	}
 
  	 return json_encode($response);
  }
@@ -59,7 +60,7 @@
  {
  	$response = array();
 
- 	 //crear array con campos basicos
+ 	 //basic user fields
  	 $campos_basicos = array(
  	 	'name' => $usuario,
  	 	'mail' => $correo,
@@ -67,7 +68,7 @@
  	 	'status' => 1,
  	 );
 
- 	 //creando el usuario
+ 	 //creating user
  	 $cuenta = user_save("", $campos_basicos);
 
  	 if (!$cuenta){
@@ -85,6 +86,7 @@
  	 	$newtipodoc = "Cédula de ciudadanía";
  	 }
 
+   //profile information: first name, last name, etc
  	 $edit = array(
  	 	'profile_id_number' => $numdoc,
  	 	'profile_name' => $nombre,
@@ -105,41 +107,37 @@
   * Function isLogged
   *
   * Checks if user is logged
+  * INPUT: sid
   */
  function isLogged($cookie_session_value)
  {
-    global $db_prefix;
+  global $db_prefix;
 
-   	//obtener la BD donde estan los usuarios
-  	$db_sessions = $db_prefix["sessions"];
+  //user DB
+  $db_sessions = $db_prefix["sessions"];
 
-  	if (!isset($db_sessions)){
-  		$db_sessions = "";
-  	}
+  if (!isset($db_sessions)){
+  	$db_sessions = "";
+  }
 
  	$response = array("codigo" => "0","msg" => "No esta logueado");
 
  	if (empty($cookie_session_value)){
- 		//argumento cadena vacia
  		return json_encode($response);
  	}
 
- 	//query para obtener el registro asociado al sid del argumento
+ 	//get uid from sid
  	$query_get_session = "SELECT uid, sid FROM {" . $db_sessions . "sessions} WHERE sid = '%s'";
  	$info_session = db_fetch_object(db_query($query_get_session, $cookie_session_value));
 
  	if ($info_session->uid == 0){
- 		//usuario anonimo cuando uid es 0
  		return json_encode($response);
  	} else if ($info_session->uid > 0 && !is_null($info_session->sid)){
- 		//esta logueado
  		$response = array("codigo" => "1", "msg" => "Esta logueado");
  		return json_encode($response);
  	} else if (is_null($info_session)){
- 		//no existe registro en la tabla sessions, todavia no tiene sesion, ni como usuario anonimo
  		return json_encode($response);
  	} else {
- 		//alguna condicion no validada
  		return json_encode($response);
  	}
 
@@ -160,7 +158,6 @@
   * Function logIn
   *
   * User log in. Input: mail and password
-  *
   */
   function logIn($correo_ext, $contrasena)
   {
@@ -170,13 +167,14 @@
   	global $user;
     global $db_prefix;
 
-   	//obtener la BD donde estan los usuarios
+   	//user DB
   	$db_sessions = $db_prefix["sessions"];
 
   	if (!isset($db_sessions)){
   	 $db_sessions = "";
   	}
 
+    //get name uid from mail
 	  $query_obtener_usuario = "SELECT name,uid FROM {" . $db_sessions . "users} WHERE name = '%s'";
 	  $usuario = db_fetch_object(db_query($query_obtener_usuario, $correo_ext));
 
@@ -194,13 +192,13 @@
 	  $params = array(
 	  					'name' => $usuario->name,
 	  					'pass' => $contrasena,
-	  				);
+	  );
 
-	  //realizar proceso autenticacion
+    //start user authentication
 	  $info_usuario = user_authenticate($params);
 
 	  if($info_usuario->uid == 0){
-	  	//no se logueo correctamente
+	  	//wrong user/pass
 	  	$response = array("codigo" => "0", "msg" => "Credenciales incorrectas");
 	  	return json_encode($response);
 	  } else {
@@ -213,13 +211,12 @@
   * Function buildCookie
   *
   * Returns SID string
-  *
   */
  function buildCookie($uid, $login)
  {
     global $db_prefix;
 
-   	//obtener la BD donde estan los usuarios
+   	//user DB
   	$db_sessions = $db_prefix["sessions"];
 
   	if (!isset($db_sessions)){
@@ -253,7 +250,7 @@
 
  	sess_destroy_sid($cookie_session_value);
 
- 	//invoca el hook hook_user() con la operacion logout, el codigo definido en el hook hara el resto
+  //invokes hook_user() with the logout operation
  	esinergia_exporter_user('logout', $tmp, $user);
 
  	return json_encode($response);
@@ -269,7 +266,7 @@
  {
     global $db_prefix;
 
-   	//obtener la BD donde estan las sesiones
+   	//user DB
   	$db_sessions = $db_prefix["sessions"];
 
   	if (!isset($db_sessions)){
@@ -300,7 +297,7 @@
  {
   global $db_prefix;
 
-  //obtener la BD donde estan los usuarios
+  //user DB
   $db_users = $db_prefix["users"];
 
   if (!isset($db_users)){
@@ -327,7 +324,7 @@
   /**
    * Function registerUser
    *
-   * Registers Users
+   * Registers Users in Drupal 6
    *
    * Input: User Info: email, names, password, ID
    * Output: SUCCESS or ERROR
@@ -336,28 +333,25 @@
    {
       global $db_prefix;
 
-      //obtener la BD donde estan los usuarios
+      //user DB
       $db_users = $db_prefix["users"];
 
       if (!isset($db_users)){
         $db_users = "";
       }
 
-      //obtener la BD donde estan la informacion de profiles
+      //user profile DB
       $db_profiles = $db_prefix["profile_values"];
 
       if (!isset($db_profiles)){
         $db_profiles = "";
       }
 
-      //validar los datos que enviaron para evitar SQL injection
+
       $response = array("codigo" => "-1", "msg" => "El usuario o correo ya existe");
 
-      //comenzar el proceso de registro
-      //el user es el email
       $user_name = $email;
 
-      //validar si ya existe el correo o el usuario en el campo mail
       $query_validar_correo = "SELECT uid FROM {" . $db_users . "users} WHERE mail = '%s'";
       $es_correo = db_fetch_object(db_query($query_validar_correo, $email));
 
@@ -365,7 +359,6 @@
          return json_encode($response);
       }
 
-      //validar si ya existe el correo o el usuario en el campo name
       $query_validar_correo2 = "SELECT uid FROM {" . $db_users . "users} WHERE name = '%s'";
       $es_correo2 = db_fetch_object(db_query($query_validar_correo2, $email));
 
@@ -373,7 +366,6 @@
         return json_encode($response);
       }
 
-      //validar si ya esta registrada la cedula dentro de la tabla profile_values
       $query_validar_cedula = "SELECT value FROM {" . $db_profiles . "users} WHERE fid = 2 AND value = '%s'";
       $es_cedula = db_fetch_object(db_query($query_validar_cedula, $numdoc));
 
@@ -391,7 +383,7 @@
         $newtipodoc = "2322";
       }
 
-      //creando el usuario en d6
+      //create user in Drupal 6
       $res = crearUsuario($email, $email, $password, $nombres, $apellidos, $telefono, $tipodoc, $numdoc);
 
       $tmp = json_decode($res);
@@ -399,10 +391,9 @@
       if (!$tmp->codigo){
         return $res;
       } else {
-        //creando el usuario en d7
+        //create user in D7 just in case
         $client = new SoapClient("https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/converter_etc/wsdl/converter.wsdl");
 
-        //la funcion crearUsuario de d7 necesita la contrasena en md5
         $res2 = $client->crearUsuario($email, $email, md5($password), $nombres, $apellidos, $telefono, $newtipodoc, $numdoc, $tmp->msg);
 
         return $res2;
@@ -418,29 +409,26 @@
   {
       global $db_prefix;
 
-      //obtener la BD donde estan los usuarios
+      //user DB
       $db_users = $db_prefix["users"];
 
       if (!isset($db_users)){
         $db_users = "";
       }
 
-      //validar los datos que enviaron para evitar SQL injection
       $response = array("codigo" => "-1", "msg" => "No se cambio el password correctamente");
       global $user;
 
-      //validar si $cadena es un correo o un nombre de usuario
       $query_validar_correo = "SELECT uid FROM {" . $db_users . "users} WHERE mail = '%s'";
       $es_correo = db_fetch_object(db_query($query_validar_correo, $cadena));
 
       $query_validar_usuario = "SELECT uid FROM {" . $db_users . "users} WHERE name = '%s'";
       $es_usuario = db_fetch_object(db_query($query_validar_usuario, $cadena));
 
-      //la cadena no es ni usuario ni correo
       if (is_null($es_correo->uid) && is_null($es_usuario->uid)){
         return json_encode($response);
       } else {
-        //cargar objeto usuario
+
         if ($es_correo->uid){
           $correo_usuario = $cadena;
 
@@ -454,13 +442,13 @@
           $user = user_load($tmp->uid);
         }
 
-        //llamar funcion notify
-      if(_user_mail_notify('password_reset', $user, $language = NULL)){
-        $response = array("codigo" => "1", "msg" => "Se cambio el password correctamente");
+        //send password reset email
+        if(_user_mail_notify('password_reset', $user, $language = NULL)){
+          $response = array("codigo" => "1", "msg" => "Se cambio el password correctamente");
         return json_encode($response);
-      } else {
-        return json_encode($response);
-      }
+        } else {
+          return json_encode($response);
+        }
 
     }
   }

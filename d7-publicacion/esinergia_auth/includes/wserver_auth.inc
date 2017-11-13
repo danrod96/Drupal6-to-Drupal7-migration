@@ -4,6 +4,8 @@
  * 
  * Webservice Methods 
  *
+ * NOTE: this webservice was used by an external mobile APP (built in C#) for logging in Drupal 6 and Drupal 7 as well, that's why there are * calls to the Drupal 6 and Drupal 7 webservice as well.
+ *
  * Version 1.0 - 10/02/2014
  * - Initial version
  * 
@@ -32,7 +34,7 @@
  /**
   * Function isLogged
   *
-  * Checks if user is logged
+  * Checks if user is logged in Drupal 6 as well
   */
  function isLogged($cookie_session_value)
  {
@@ -52,7 +54,7 @@
   /**
   * Function getUserName
   * 
-  * returns user name
+  * returns user name from Drupal 6
   */
  function getUserName($cookie_session_value)
  {  
@@ -67,7 +69,7 @@
   * FUnction getUid
   *
   * Input: Session ID String
-  * Output: UID
+  * Output: UID from Drupal 6
   */
  function getUid($cookie_session_value)
  {
@@ -81,7 +83,7 @@
   /**
   * Function logOut
   *
-  * Logs Out User
+  * Logs Out User from Drupal 6
   */
  function logOut($cookie_session_value)
  {
@@ -89,7 +91,7 @@
 
   $res = $client->logOut($cookie_session_value);
 
-  //desloguear en Publicacion D7 tambien
+  //logging off from Drupal 7 as well
   $uid6 = getUid($cookie_session_value);
 
   $client2 = new SoapClient("https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/converter_etc/wsdl/converter.wsdl");
@@ -103,6 +105,7 @@
   * Function logIn
   *
   * User log in. Input: mail and password
+  * Logs in Drupal 6 and Drupal 7 as well.
   *
   */
   function logIn($correo_ext, $contrasena)
@@ -111,6 +114,7 @@
 
    $client = new SoapClient("http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl");
 
+   //logs in Drupal 6 website
    $res = $client->logIn($correo_ext, $contrasena);
 
    $tmp = json_decode($res);
@@ -127,7 +131,7 @@
 
       $response = array("codigo" => $tmp2->sid, "msg" => "Usuario logueado");
 
-      //loguear a Drupal 7
+      //logs in Drupal 7 if needed
       $client2 = new SoapClient("https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/converter_etc/wsdl/converter.wsdl");
 
       $sessname = $client2->getSessionName();
@@ -136,7 +140,7 @@
 
       $tmp4 = json_decode($res4);
 
-      //logueo correcto en D7, construir cookie
+      //build cookie in Drupal 7
       if ($tmp4->codigo == 1){
         $res5 = $client2->buildCookie($tmp4->uid, $tmp4->timestamp);
 
@@ -153,7 +157,7 @@
  /**
   * Function resetPasswd
   *
-  * Resets password user
+  * Resets password user for the Drupal 6 account
   */
   function resetPasswd($cadena)
   {
@@ -167,7 +171,7 @@
   /**
    * Function registerUser
    *
-   * Registers Users
+   * Registers Users on the Drupal 6 site
    *
    * Input: User Info: email, names, password, ID
    * Output: SUCCESS or ERROR
@@ -176,6 +180,7 @@
    {
      $client = new SoapClient("http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl");
 
+     //call to the registerUser method
      $res = $client->registerUser($email, $tipodoc, $numdoc, $nombres, $apellidos, $telefono, $password);
 
      return $res;

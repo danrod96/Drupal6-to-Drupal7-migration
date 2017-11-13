@@ -1,5 +1,5 @@
 name = Esinergia Authentication
-description = "Module for providing the Webservice in Drupal 7, which will be used by the Drupal 6 website for logging in here."
+description = "Module for providing user authentication and registration to the Mobile App"
 package = E SINERGIA
 core = 7.x
 version = "7.x-1.0"

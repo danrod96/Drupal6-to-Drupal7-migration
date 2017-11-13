@@ -2,7 +2,8 @@
 /**
  * @file
  *
- * Set of functions for enabling a SOAP WebService
+ * Set of functions for enabling a SOAP WebService. Also, some functions are defined here for migrating Drupal users from the old website to 
+ * the newer website
  *
  */
 
@@ -24,8 +25,8 @@ function esinergia_exporter_server()
 	$server = new SoapServer($path_wsdl);
 
  	//SOAP methods
- 	$server->addFunction("existeUsuario");  //user exists
- 	$server->addFunction("crearUsuario"); //create user
+ 	$server->addFunction("existeUsuario");  
+ 	$server->addFunction("crearUsuario"); 
  	$server->addFunction("isLogged"); 
  	$server->addFunction("getSessionName");
  	$server->addFunction("logIn");
@@ -40,14 +41,17 @@ function esinergia_exporter_server()
 
  /**
   * Implements hook_init()
+  *
+  * set global variable for the migration process
   */
-  function esinergia_exporter_init()
-  {
-  	$val = variable_get('uidactual', NULL);
-  	if (!$val){
+function esinergia_exporter_init()
+{
+  $val = variable_get('uidactual', NULL);
+
+  if (!$val){
   		variable_set('uidactual', '2');
-  	}
   }
+}
 
  /**
   * Implements hook_menu()
@@ -105,7 +109,6 @@ function esinergia_exporter_server()
   {
    $form = array();
 
-
    $form['usuario'] = array(
      '#type' => 'textfield',
      '#title' => t('Usuario'),
@@ -121,15 +124,16 @@ function esinergia_exporter_server()
   }
 
  /**
-  * Form for exporting a single user - Submit
+  * Form for exporting a single user - Submit function
   *
-  * This function will create an endpoint to a SOAP Webservice available in a Drupal 7 Website, then it will call methods for exporting
-  * the Drupal 6 user information and creating the same user in Drupal 7, but with different UID of course.
+  * This function will create an endpoint to a SOAP Webservice available in the Drupal 7 Website, then it will call a couple of methods for 
+  * exporting the Drupal 6 user information and creating the same user in Drupal 7, but with a different UID of course.
   */
   function esinergia_migrate_user_form_submit($form, &$form_state)
   {
    global $db_prefix;
 
+   //the user profile information is stored on a different DB: profile_values
    $db_profiles = $db_prefix["profile_values"];
 
    if (!isset($db_profiles)){
@@ -141,11 +145,13 @@ function esinergia_exporter_server()
 
  	 $usuario = $form_state['values']['usuario'];
 
+   //check if the user exists in Drupal 7
  	 $tmp = $client->existeUsuario($usuario);
 
  	 $res = json_decode($tmp);
 
  	 if (!$res->codigo){
+    //user doesn't exist in Drupal 7, so we will migrate it
  	 	drupal_set_message(t("El usuario no existe, creando el usuario: " . $usuario));
 
  		$objuser = user_load(array('name' => $usuario));
@@ -153,6 +159,7 @@ function esinergia_exporter_server()
  		if (!$objuser){
  			drupal_set_message(t("Error al cargar la data del usuario"), "error");
  		} else {
+      //load user profile info: first name, last name, etc.
  			$query_num_doc = "SELECT value FROM {" . $db_profiles . "profile_values} WHERE fid = 2 AND uid = %d";
  			$tmp = db_fetch_object(db_query($query_num_doc, $objuser->uid));
 
@@ -227,14 +234,17 @@ function esinergia_exporter_server()
           $contra = $tmp->pass;
       }
 
+      //calling the method for creating the user in Drupal 7
  			$tmp = $client->crearUsuario($correo, $usuario, $contra, $nombre, $apellido, $telefono, $tipodoc_id, $numdoc, $objuser->uid);
 
  			$res = json_decode($tmp);
 
  			if ($res->codigo){
+        //user migrated
  				drupal_set_message("Usuario creado");
  				drupal_set_message($res->msg);
  			} else {
+        //user not migrated
  				drupal_set_message("Usuario no creado, error", "error");
  			}
  		}
@@ -248,7 +258,7 @@ function esinergia_exporter_server()
    */
   function esinergia_migrate_uid(&$form_state)
   {
- 	$form = array();
+ 	  $form = array();
 
   	$form['uid'] = array(
     	'#title' => 'Escriba el UID de usuario desde comenzar a crear',
@@ -281,9 +291,6 @@ function esinergia_exporter_server()
   	if(!is_numeric($form_state['values']['num_usuarios'])){
     	form_set_error('num_usuarios','Escriba un valor numerico para este campo.');
   	}
-
-  	//validar si el uid ya ha sido procesado
-  	$uid_actual = variable_get('uidactual', NULL);
 
   	if(!is_numeric($form_state['values']['uid'])){
     	form_set_error('uid','Escriba un valor numerico para este campo.');
@@ -328,6 +335,7 @@ function esinergia_exporter_server()
  function esinergia_reset_uid_submit($form, &$form_state)
  {
   	variable_set('uidactual', $form_state['values']['uid']);
+
   	drupal_set_message("UID reseteado");
  }
 
@@ -337,6 +345,8 @@ function esinergia_exporter_server()
  function esinergia_migrate_uid_submit($form, &$form_state)
  {
    variable_set('uidactual', $form_state['values'] ['uid']);
+
+   //we use the Drupal 6 batch API for mass-migrating users to the newer website
    batch_set(array(
     'title' => t('Creacion Usuarios Batch'), 'operations' => array(
       // You can actually chain together multiple batch processes here
@@ -371,25 +381,25 @@ function esinergia_exporter_server()
   global $user;
   global $db_prefix;
 
-   //obtener la BD donde esta la tabla profile
   $db_profiles = $db_prefix["profile_values"];
 
   if (!isset($db_profiles)){
     $db_profiles = "";
   }
 
-  /* numero de ciclos en la iteracion */
+  /* number of cycles for each iteration */
   $limit = 10;
 
   /*
    * Set the variables that need to persist throughout the batch process. These need to be set inside
-  t* he $context array because that's what persists throughout the process.
-  */
+   * he $context array because that's what persists throughout the process.
+   */
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['title'] = $uid;
     $context['sandbox']['max'] = $num_usuarios;
 
+    //endpoint to the Drupal 7 webservice
     $client = new SoapClient("https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/converter_etc/wsdl/converter.wsdl");
 
   	$context['sandbox']['client'] = $client;
@@ -398,7 +408,7 @@ function esinergia_exporter_server()
 
   for($i = 0; $i < $limit; $i++){
     if($context['sandbox']['progress'] < $context['sandbox']['max']){
-      //verificar si el uid del conteo existe
+
       $objuser = user_load($context['sandbox']['contuid']);
       if (!$objuser){
       	$context['sandbox']['contuid']++;
@@ -481,9 +491,10 @@ function esinergia_exporter_server()
           $contra = $tmp->pass;
       }
 
-	 		//llamada al webservice
+	 		//we need to call the webservice once more
 	 		$client = new SoapClient("https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/converter_etc/wsdl/converter.wsdl");
 
+      //create the user in Drupal 7
 	 		$tmp = $client->crearUsuario($correo, $usuario, $contra, $nombre, $apellido, $telefono, $tipodoc_id, $numdoc, $objuser->uid);
 
       $res = json_decode($tmp);
@@ -492,15 +503,17 @@ function esinergia_exporter_server()
         watchdog("Migrador Usuarios", "El usuario " . $correo . " no se pudo migrar", WATCHDOG_NOTICE);
       }
 
-	      	$usuario_creado = $context['sandbox']['uid'].' #'.$context ['sandbox']['contuid'];
-	      	$context['sandbox']['progress']++;
-	      	$context['results'][] = $usuario_creado;
-          if ($res->codigo){
-  	      	$context['message'] = "Creado usuario uid " . $context ['sandbox']['contuid'] . " en total de " . $context['sandbox']['max'] . " usuarios a crear";
-          } else {
-            $context['message'] = "NO se creo el usuario uid " . $context ['sandbox']['contuid'] . " en total de " . $context['sandbox']['max'] . " usuarios a crear";
-          }
-	      	$context['sandbox']['contuid']++;
+	    $usuario_creado = $context['sandbox']['uid'].' #'.$context ['sandbox']['contuid'];
+	    $context['sandbox']['progress']++;
+	    $context['results'][] = $usuario_creado;
+
+      if ($res->codigo){
+  	    $context['message'] = "Creado usuario uid " . $context ['sandbox']['contuid'] . " en total de " . $context['sandbox']['max'] . " usuarios a crear";
+      } else {
+        $context['message'] = "NO se creo el usuario uid " . $context ['sandbox']['contuid'] . " en total de " . $context['sandbox']['max'] . " usuarios a crear";
+      }
+	      	
+      $context['sandbox']['contuid']++;
       }
     }
 
@@ -516,7 +529,7 @@ function esinergia_exporter_server()
  /**
  * Implements hook_form_alter().
  *
- * If user was created in Drupal 6, it should be created in Drupal 7 as well.
+ * If user was created or changed in Drupal 6, it should be created  or changed in Drupal 7 as well.
  */
  function esinergia_exporter_form_alter(&$form, &$form_state, $form_id)
  {
@@ -529,19 +542,22 @@ function esinergia_exporter_server()
  	}
  }
 
+ /* edit user form: submit function 
+  *
+  * It is executed each time the user submits the edit user form
+  */
  function esinergia_exporter_edit_user_form_submit($form, &$form_state)
  {
  	global $user;
  	global $db_prefix;
 
-	//obtener la BD donde estan la informacion de profiles
   $db_profiles = $db_prefix["profile_values"];
 
   if (!isset($db_profiles)){
-      $db_profiles = "";
-    }
+    $db_profiles = "";
+  }
 
-   	$query_num_doc = "SELECT uid, value FROM {" . $db_profiles . "profile_values} WHERE fid = 2 AND value = '%s'";
+  $query_num_doc = "SELECT uid, value FROM {" . $db_profiles . "profile_values} WHERE fid = 2 AND value = '%s'";
 
  	$tmp = db_fetch_object(db_query($query_num_doc, $form_state['values']['id_number']));
 
@@ -550,9 +566,10 @@ function esinergia_exporter_server()
  			form_set_error('id_number', 'El numero de identificacion ya esta registrado: ' . $form_state['values']['id_number']);
  			return -1;
  		} else {
-
+      //endpoint to the Drupal 7 site
 		 	$client = new SoapClient("https://seg.eltiempo.com/publicaraviso/sites/all/modules/custom/converter_etc/wsdl/converter.wsdl");
 
+      //user info
 			$newnom = $form_state['values']['name'];
 			$newlast = $form_state['values']['lastname'];
 			$newtel = $form_state['values']['phone'];
@@ -561,19 +578,21 @@ function esinergia_exporter_server()
 
 			$uid6 = $user->uid;
 
-			 if ($tipodoc == "NIT"){
-		   		$newtipodoc = "2323";
-		   	} else if (strpos($tipodoc, "ciudada")) {
-		   		$newtipodoc = "2322";
-		   	} else if (strpos($tipodoc, "extranj")){
-		   		$newtipodoc = "2324";
-		   	} else {
-		   		$newtipodoc = "2322";
-		   	}
+			if ($tipodoc == "NIT"){
+		   	$newtipodoc = "2323";
+		  } else if (strpos($tipodoc, "ciudada")) {
+		   	$newtipodoc = "2322";
+		  } else if (strpos($tipodoc, "extranj")){
+		   	$newtipodoc = "2324";
+		  } else {
+		   	$newtipodoc = "2322";
+		  }
 
-		  	$tmp = $client->actualizarUsuario($newnom, $newlast, $newtel, $newtipodoc, $newnumdoc, $uid6);
+      //update user info in Drupal 7
+		  $tmp = $client->actualizarUsuario($newnom, $newlast, $newtel, $newtipodoc, $newnumdoc, $uid6);
 
 		 	$res = json_decode($tmp);
+
 		 	}
  		}
  }
@@ -581,7 +600,7 @@ function esinergia_exporter_server()
   /**
   * Implements hook_user
   *
-  * If user logs off, the cookie associated with that session is destroyed
+  * If user logs off from the Drupal 6 site, we have to log off from Drupal 7 as well
   */
   function esinergia_exporter_user($op, &$edit, &$account, $category = NULL)
   {
@@ -596,11 +615,11 @@ function esinergia_exporter_server()
 
 		  $tmp = json_decode($client);
 
-		  //procedimiento borrado cookie y registro de la tabla session
+      //erase sid from sessions table
 		  $_SESSION = array();
 		  sess_destroy_sid($user->sid);
 
-		  //borrar cookie
+		  //erase cookie as well
 		  if (isset($_COOKIE[session_name()])) {
 			 setcookie(session_name(), '', $_SERVER['REQUEST_TIME'] - 3600, '/', $cookie_domain);
 		  }
@@ -612,8 +631,7 @@ function esinergia_exporter_server()
 
 /**
  * Implements hook_mail
- *
- * */
+ */
 function esinergia_exporter_mail($key, &$message, $params)
 {
   $language = $message['language'];

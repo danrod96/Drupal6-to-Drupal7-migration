@@ -2,7 +2,7 @@
 /**
  * @file
  *
- * Module for providing auth services for Drupal 7, cookie creation and session purge.
+ * Module for providing auth services for Drupal 7, cookie creation and session purging.
  */
 
  /**
@@ -15,75 +15,80 @@
  	global $user;
  	global $cookie_domain;
 
- 	//validar si existe $edit['input'], si no existe, es porque esta logueandose desde el webservice
+ 	//if $edit['input'] is set, it means that the user is logging in from the login page (/user)
  	if (isset($edit['input'])){ 
+ 		//user and pass
 	 	$usuario = $edit['input']['name'];
 	 	$contrasena = $edit['input']['pass'];
 
-	 	//esta variable es importante porque almacena la sesion de drupal 6, que luego se utiliza para construir la cookie en D6
+	 	//session variable for storing the SID from Drupal 6
 	 	$_SESSION["sid_usuario_d6"] = "";
 
-	 	//cambiar a produccion o a donde este el servicio
+	 	//call to Drupal 6 SOAP webservice
 	 	$client = new SoapClient("http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl");
 
+	 	//check if user in Drupal 7 exists in Drupal 6 as well
 	 	$res = $client->existeUsuario($usuario);
 
 	 	$tmp = json_decode($res);
 
 	 	if (!$tmp->codigo){
-	 		//drupal_set_message("El usuario no existe en drupal 6");
+	 		//user doesn't exist in Drupal 6
 	 	} else {
 	 		if (is_array($contrasena)){
-	 			//usuario recien registrado
+	 			//user just joined/registered into the website
 	 			$contrasena = $edit['input']['pass']['pass2'];
 	 		}
 
-	 		//hace el proceso inicial de login
+	 		//logs in Drupal 6
 	 		$res = $client->logIn($usuario, $contrasena);
 
 	 		$tmp = json_decode($res);
 
 	 		if ($tmp->codigo  == -1){
-	 			//drupal_set_message("El usuario no existe en drupal 6");
+	 			//user doesn't exist in Drupal 6
 	 		} else if ($tmp->codigo == 0){
-	 			//drupal_set_message("Credenciales incorrectas en Drupal 6");
+	 			//wrong user/password credentials
 	 		} else {
+	 			//get session name from Drupal 6
 			 	$session_name = $client->getSessionName();
 
 			 	//no construyo bien la cookie en el primer intento de logIn, forzar login de nuevo y la construccion de la cookie
+			 	//sometimes the first call to the logIn method wasn't working, so we make another call to logIn for generating the cookie
 			 	if (!isset($tmp->sid)){
 			 		$res1 = $client->logIn($usuario, $contrasena);
 
 			 		$tmp1 = json_decode($res1);
 
+			 		//buildCookie method returns the SID from Drupal 6
 			 		$res2 = $client->buildCookie($tmp1->uid, $tmp1->timestamp);
 
 			 		$tmp2 = json_decode($res2);
 			 	} else { 
-
+			 		//buildCookie method returns the SID from Drupal 6
 			 		$res = $client->buildCookie($tmp->uid, $tmp->timestamp);
 
 			 		$tmp2 = json_decode($res);
 
 			 	}
 
-			 	//construir la cookie de Drupal 6
+			 	//build the Druoal 6 cookie 
 			 	setcookie($session_name, $tmp2->sid, $_SERVER['REQUEST_TIME'] + 3600, "/", ".eltiempo.com");
 
-			 	//Guardar la sesion de Drupal 6 dentro del arreglo $_SESSION
+			 	//store the Drupal 6 SID into the session variable
 			 	$_SESSION["sid_usuario_d6"] = $tmp2->sid;
 	 		}
 	 	}
 
  	} else {
- 		//hacer validaciones necesarias
+ 		//extra validations
  	}
  }
 
  /**
   * Implements hook_user_logout
   *
-  * If user logs out from Drupal 7, this hook will call the webservice for logging out from Drupal 6
+  * If the user logs out from Drupal 7, this hook will call the webservice method logOut for logging out from Drupal 6 as well
   */
  function logincookie_etc_user_logout($account)
  {
@@ -91,13 +96,14 @@
 
  	$session_name = $client->getSessionName();
 
+ 	//Drupal 6 SID
  	$sid_d6 = $_SESSION["sid_usuario_d6"];
 
  	if ($sid_d6 != ""){
- 		//el cookie en drupal 6 se levanto desde drupal 7
+ 		//logs out from Drupal 6, passing the Drupal 6 SID as argument
  		$client->logOut($sid_d6);
  	} else {
- 		//el cookie en d6 no se levanto de drupal 7, pudo haber sido levantado desde mobile
+ 		//just in case the user logged in from the Mobile page
  		$client->logOut($_COOKIE[$session_name]);
  	}
  }

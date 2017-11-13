@@ -1,5 +1,5 @@
 name = Esinergia Converter
-description = "Modulo que crea un webservice para registrar usuarios"
+description = "Module for enabling the Webservice in Drupal 7, which will be used by the Drupal 6 website for logging in here."
 package = E SINERGIA
 core = 7.x
 version = "7.x-1.0"

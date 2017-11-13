@@ -2,14 +2,14 @@
 /**
  * @file
  * 
- * Modulo que provee un servicio para registrar usuarios.
+ * Module for providing a service for logging in users, register users, logging off users
  * 
  */
 
  /**
   * Function converter_etc_server
   * 
-  * Es la funcion que genera una instancia del servicio SOAP. Llamada por hook_menu al entrar a http://www.sitioweb.com/services/soap
+  * Creates a SOAP WebService Instance
   */
 function converter_etc_server()
 {	 
@@ -17,13 +17,13 @@ function converter_etc_server()
 	
 	include_once($path_funciones);
 	
-	//incluir el archivo wsdl
+	//include wsdl file
 	$path_wsdl = getcwd() . '/' . drupal_get_path('module', 'converter_etc') . '/wsdl/converter.wsdl';
 	
-	//instanciar webservice
+	//create a SoapServer object
 	$server = new SoapServer($path_wsdl);
  
- 	//agregar las funciones a consumir
+ 	//adding the methods
  	$server->addFunction("existeUsuario");
  	$server->addFunction("crearUsuario");
  	$server->addFunction("actualizarUsuario");
@@ -37,13 +37,13 @@ function converter_etc_server()
 
  
  /**
-  * Implementation of hook_menu
-  * 
-  * El cliente no entra directamente a a este path, lo hace por intermedio del archivo wsdl.
+  * Implements hook_menu()
   */
  function converter_etc_menu()
  {
 	$items = array();
+
+	//define the menu item for the webservice endpoint
 	$items['services/soap'] = array(
 		'title' => 'SOAP Server',
 		'page callback' => 'converter_etc_server',
@@ -56,22 +56,19 @@ function converter_etc_server()
 
 
 /**
- * Implementation of hook_user_presave
+ * Implements hook_user_presave()
  * 
- * hook que se ejecuta cuando un usuario esta a punto de ser creado o actualizado
- * puede ejecutarse cuando:
+ * A user account is about to be created or updated. This function is called in these situations:
  * 
- * 1. Se crea un usuario de drupal 7 por el formulario y se crea en 6, en ese caso se ejecuta el codigo a continuacion
- * 2. Se crea un usuario en drupal 7 desde d6 por webservice, en ese caso hay que verificar que el usuario se esta creando
- * por el formulario
+ * 1. an user is being created in Drupal 7 from user/register
+ * 2. an user is being created in Drupal 7 from the Drupal 6 webservice methods.
  */
  function converter_etc_user_presave(&$edit, $account, $category)
  {
  	if ($account->is_new){ 
- 		//se envio por medio del formulario y no por webservice, por webservice, $_POST no tiene informaciopn
- 		//por lo tanto no pasa la ejecucion por aca, lo cual es la idea
+		// user/register form submission from Drupal 7
  		if (isset($_POST["name"])){ 
-		 	//llamar al webservice de drupal 6 para registrar el usuario alla
+ 			//Drupal 6 webservice instance
 		 	$client = new SoapClient("http://clasificados.eltiempo.com/sites/all/modules/custom/esinergia_exporter/wsdl/exporter.wsdl");
 		
 			$language = "LANGUAGE_NONE";
@@ -85,17 +82,16 @@ function converter_etc_server()
 			$numdoc = $edit["field_id_number"][$language][0]["value"];
 		 	$telefono = $edit["field_phone_number"][$language][0]["value"];
 		  	
+		  	//calling the webservice method for creating the user in Drupal 6
 		  	$tmp = $client->crearUsuario($correo, $usuario, $contra, $nombre, $apellido, $telefono, $tipodoc, $numdoc);
 		  	
 		  	$res = json_decode($tmp);
 		  	
 		  	if (!$res){
-		  		//drupal_set_message("Error al cargar el usuario en drupal 6", "error");
+		  		//error creating the user in Drupal 6
 		  	} else {
-		  		//drupal_set_message("Usuario creado en drupal 6 correctamente");
-		  		
-		  		//la funcion crearUsuario debe devolver el UID del usuario en Drupal 6
-		  		//para guardarlo aca
+		  		//user created in Drupal 6
+		  		//save the Drupal 6 user id inside a field in Drupal 7, because they are different
 				$edit["field_uid_d6"][$language][0]["value"] = $res->msg;
 		  	}
 	  	

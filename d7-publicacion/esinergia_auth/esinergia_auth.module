@@ -35,13 +35,13 @@ function esinergia_auth_server()
 
 	include_once($path_funciones);
 
-	//incluir el archivo wsdl
+	//include wsdl file
 	$path_wsdl = getcwd() . '/' . drupal_get_path('module', 'esinergia_auth') . '/wsdl/auth.wsdl';
 
-	//instanciar webservice
+	//create a SoapService Object
 	$server = new SoapServer($path_wsdl);
 
- 	//agregar las funciones a consumir
+ 	//adding the available methods
  	$server->addFunction("isLogged");
  	$server->addFunction("getUid");
  	$server->addFunction("getUserName");
@@ -54,11 +54,12 @@ function esinergia_auth_server()
 
  /**
   * Implements hook_menu
-  *
   */
  function esinergia_auth_menu()
  {
 	$items = array();
+
+	//define the menu item for the webservice endpoint
 	$items['services/soap2'] = array(
 		'title' => 'SOAP Server',
 		'page callback' => 'esinergia_auth_server',
